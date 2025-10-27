@@ -98,7 +98,7 @@ admm_MADMMplasso <- function(beta0, theta0, beta, beta_hat, theta, rho1, X, Z, m
 
   SVD_D <- Diagonal(x = svd.w$d)
   R_svd <- (svd.w$u %*% SVD_D) / N
-  R_svd_inv <- solve(R_svd)
+  R_svd_inv <- MASS::ginv(as.matrix(R_svd))
 
   rho <- rho1
   Big_beta11 <- V
@@ -144,7 +144,7 @@ admm_MADMMplasso <- function(beta0, theta0, beta, beta_hat, theta, rho1, X, Z, m
       part_z <- DD3 %*% t(W_hat)
       part_y <- DD3 %*% my_beta_jj
 
-      beta_hat_j <- solve(R_svd_inv + svd.w$tv %*% part_z)
+      beta_hat_j <- MASS::ginv(as.matrix(R_svd_inv + svd.w$tv %*% part_z))
       beta_hat_j <- beta_hat_j %*% (svd.w$tv %*% part_y)
       beta_hat_j <- part_z %*% beta_hat_j
       beta_hat_JJ <- part_y - beta_hat_j
@@ -356,7 +356,7 @@ admm_MADMMplasso <- function(beta0, theta0, beta, beta_hat, theta, rho1, X, Z, m
     theta[, , jj] <- (beta_hat1[, -1])
     beta_hat[, jj] <- c(c(beta_hat1[, 1], as.vector(theta[, , jj])))
   }
-  y_hat <- model_p(beta0, theta0, beta = beta_hat, X = W_hat, Z)
+  y_hat <- model_p(beta0, theta0, beta_hat, W_hat, Z)
 
   out <- list(beta0 = beta0, theta0 = theta0, beta = beta, theta = theta, converge = converge, obj = obj, beta_hat = beta_hat, y_hat = y_hat)
 
